@@ -26,11 +26,24 @@ JSON example of user payload:
 ```
 
 ## Implementation
-For the structure of files DDD approach is used. Main directory is app/Domains. 
+For the structure of files DDD approach is used. Main directory is app/Domains.
+
+`app/Domains/Users/DB/Models` directory contains Eloquent Models. User model is extended for CQRS pattern into `UsersCommandModel` for write operations and `UsersQueryModel` for read operations. This pattern is used for scaling - separating write from read logic. Database server layer write operations should use DB master server and all read operations should use DB slave replica server. In this project BD slave replica server is not implemented.
+
+`app/Domains/Users/DB` directory contains `UsersCommand` and `UsersQuery` services that uses `UsersCommandModel` and `UsersQueryModel` accordingly similar to `repository` pattern.
+
+Update endpoint and command is configured to use `PATCH` HTTP method.
+
+Index endpoint have filtering, sorting and pagination.
+
+### Data structure of project
+* Added `last_name` to standard laravel user structure and renamed `name` into `first_name`.
+* Added `user_details` table for `address` field as suggested in task description. It is expected for one user to have one address and the relation is set accordingly - one to one. But according to example JSON data this table could be called `user_address` and each address field should have its own column - for example: country, region, city, street, house, appartament.
 
 
 # TODO
-* create DDD directory structure: 
+
+* create DDD directory structure:
 
         |- App/Domains/Users
         |  |- Controllers
@@ -42,16 +55,24 @@ For the structure of files DDD approach is used. Main directory is app/Domains.
         |  |  |- Models
         |  |  |  |- UsersCommandModel.php
         |  |  |  |- UsersQueryModel.php
-        |  |- Forms
-        |  |  |- UsersForm.php
+        |  |  |  |- UserDetails.php
+        |  |- Requests
+        |  |  |- UserStoreData.php
+        |  |  |- UserStoreRequest.php
+        |  |  |- UserUpdateData.php
+        |  |  |- UserUpdateRequest.php
         |  |- Resources
         |  |  |- UserResource.php
         |- App/Models
         |  |- User.php
-        |  |- UserDetails.php
         |  |- HasUuid.php
 
+* index functionality
+
 ## Done
+* store functionality
+* update functionality
+* delete functionality
 * Models and UUID trait
 * Database structure: migrations, models
 * setup db env vars

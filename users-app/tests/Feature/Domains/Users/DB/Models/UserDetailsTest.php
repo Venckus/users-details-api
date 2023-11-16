@@ -12,9 +12,6 @@ class UserDetailsTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * A basic feature test example.
-     */
     public function testShouldCreateUserDetails(): void
     {
         $user = User::factory()->create();

@@ -18,5 +18,5 @@ class UsersQueryModel extends User
      * by creating DB slave replica server and change this
      * to the name of the DB slave replica connection from config/database.php
      */
-    protected $connection = 'pgsql';
+    // protected $connection = 'pgsql';
 }

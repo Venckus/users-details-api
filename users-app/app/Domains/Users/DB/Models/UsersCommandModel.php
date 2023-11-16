@@ -16,5 +16,5 @@ class UsersCommandModel extends User
      * by creating DB slave replica server and
      * this should be the name of the DB master connection from config/database.php
      */
-    protected $connection = 'pgsql';
+    // protected $connection = 'pgsql';
 }
