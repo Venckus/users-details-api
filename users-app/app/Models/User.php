@@ -4,7 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Domains\Users\DB\Models\UserDetails;
-// use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -16,7 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasUuid; //, HasUuids;
+    use HasApiTokens, HasFactory, Notifiable, HasUuid;
 
     public const FIRST_NAME = 'first_name';
     public const LAST_NAME = 'last_name';
@@ -24,8 +23,6 @@ class User extends Authenticatable
     public const PASSWORD = 'password';
     public const REMEMBER_TOKEN = 'remember_token';
     public const EMAIL_VERIFIED_AT = 'email_verified_at';
-
-    // protected string $primaryKey = self::UUID;
 
     /**
      * The attributes that are mass assignable.

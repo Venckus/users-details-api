@@ -263,7 +263,194 @@ class UsersControllerTest extends TestCase
         $this->assertDatabaseCount('user_details', 0);
     }
 
-    public function setupUserWithDetails(): User
+    public function testShouldReturnUsers(): void
+    {
+        User::factory()->count(3)->create();
+
+        $response = $this->json(
+            method: 'GET',
+            uri: '/api/users'
+        );
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(3, 'data');
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'uuid',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'address',
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @dataProvider indexFilterDataProvider
+     * @param string[][] $paramsArray
+     */
+    public function testShouldFilterUsers(array $paramsArray): void
+    {
+        User::create([
+            'first_name' => 'test name',
+            'last_name' => 'test last name',
+            'email' => 'test@mail.com',
+            'password' => '123456',
+        ]);
+        $user2 = User::create([
+            'first_name' => 'abc name',
+            'last_name' => 'abc last name',
+            'email' => 'abc@mail.com',
+            'password' => '123456',
+        ]);
+
+        $response = $this->json(
+            method: 'GET',
+            uri: '/api/users',
+            data: $paramsArray
+        );
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJson([
+            'data' => [
+                [
+                    'uuid' => $user2->uuid,
+                    'first_name' => $user2->first_name,
+                    'last_name' => $user2->last_name,
+                    'email' => $user2->email,
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @return string[][]
+     */
+    public static function indexFilterDataProvider(): array
+    {
+        return [
+            'filter by first_name' => [
+                ['first_name' => 'abc name'],
+            ],
+            'filter by last_name' => [
+                ['last_name' => 'abc last name'],
+            ],
+            'filter by email' => [
+                ['email' => 'abc@mail.com'],
+            ],
+            'filter by first_name and last_name' => [
+                [
+                    'first_name' => 'abc name',
+                    'last_name' => 'abc last name',
+                ],
+            ],
+            'filter by first_name and email' => [
+                [
+                    'first_name' => 'abc name',
+                    'email' => 'abc@mail.com',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider indexSortDataProvider
+     */
+    public function testShouldSortUsers(
+        string $sortBy,
+        string $sort,
+        string $jsonPath1,
+        string $jsonPath2,
+        string $jsonPath3,
+    ): void {
+        $user1 = User::create([
+            'first_name' => 'test name',
+            'last_name' => 'test last name',
+            'email' => 'test@mail.com',
+            'password' => '123456',
+        ]);
+        $user2 = User::create([
+            'first_name' => 'abc name',
+            'last_name' => 'abc last name',
+            'email' => 'abc@mail.com',
+            'password' => '123456',
+        ]);
+        $user3 = User::create([
+            'first_name' => 'xyz name',
+            'last_name' => 'xyz last name',
+            'email' => 'xyz@mail.com',
+            'password' => '123456',
+        ]);
+
+        $response = $this->json(
+            method: 'GET',
+            uri: '/api/users',
+            data: [
+                'sort_by' => $sortBy,
+                'sort' => $sort,
+            ]
+        );
+
+        $response->assertStatus(200);
+        $response->assertJsonPath($jsonPath1, $user1->$sortBy);
+        $response->assertJsonPath($jsonPath2, $user2->$sortBy);
+        $response->assertJsonPath($jsonPath3, $user3->$sortBy);
+    }
+
+    /**
+     * @return string[][]
+     */
+    public static function indexSortDataProvider(): array
+    {
+        return [
+            'sort by first_name desc' => [
+                'first_name',
+                'desc',
+                'data.1.first_name',
+                'data.2.first_name',
+                'data.0.first_name',
+            ],
+            'sort by last_name asc' => [
+                'last_name',
+                'asc',
+                'data.1.last_name',
+                'data.0.last_name',
+                'data.2.last_name',
+            ],
+            'sort by email desc' => [
+                'email',
+                'desc',
+                'data.1.email',
+                'data.2.email',
+                'data.0.email',
+            ],
+        ];
+    }
+
+    public function testShouldPaginateUsers(): void
+    {
+        User::factory()->count(15)->create();
+
+        $response = $this->json(
+            method: 'GET',
+            uri: '/api/users'
+        )->assertStatus(200);
+
+        $response->assertJsonCount(10, 'data');
+
+        $response = $this->json(
+            method: 'GET',
+            uri: '/api/users',
+            data: ['page' => 2]
+        )->assertStatus(200);
+
+        $response->assertJsonCount(5, 'data');
+    }
+
+    private function setupUserWithDetails(): User
     {
         $userData = $this->userDataSample;
 
@@ -272,4 +459,5 @@ class UsersControllerTest extends TestCase
 
         return $user;
     }
+
 }

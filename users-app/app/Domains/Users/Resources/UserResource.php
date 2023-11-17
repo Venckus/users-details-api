@@ -18,12 +18,14 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $this->resource->loadMissing('details');
+
         return [
             User::UUID => $this->resource->uuid,
             User::FIRST_NAME => $this->resource->first_name,
             User::LAST_NAME=> $this->resource->last_name,
             User::EMAIL => $this->resource->email,
-            UserDetails::ADDRESS => $this->whenLoaded('details')?->address,
+            UserDetails::ADDRESS => $this->whenLoaded('details', $this->details?->address),
         ];
     }
 }
