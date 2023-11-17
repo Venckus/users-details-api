@@ -25,7 +25,7 @@ class UserResource extends JsonResource
             User::FIRST_NAME => $this->resource->first_name,
             User::LAST_NAME=> $this->resource->last_name,
             User::EMAIL => $this->resource->email,
-            UserDetails::ADDRESS => $this->whenLoaded('details', $this->details?->address),
+            UserDetails::ADDRESS => $this->when(!is_null($this->details), $this->details?->address),
         ];
     }
 }
